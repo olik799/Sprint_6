@@ -1,40 +1,47 @@
-import pytest
-from selenium import webdriver
-from config import URL
-from pages.order_page import OrderPageScooter
+from pages.order_page import OrderPage
+from pages.main_page import MainPage
+from pages.add_order_page import AddOrderPage
+from pages.order_confirm_popup_page import OrderConfirmPopUp
+from data import name, first_name, address, phone_number
 import allure
 
 
 class TestOrderScooter:
-    driver = None
 
-    @classmethod
-    def setup_class(cls):
-        cls.driver = webdriver.Firefox()
-        cls.driver.get(URL)
-        cls.order_page = OrderPageScooter(cls.driver)
+    @allure.title('Проверка заказа самоката через верхнюю кнопку "Заказать"')
+    def test_order_scooter_top_order_button(self, driver):
+        main_page = MainPage(driver)
+        main_page.click_order_button()
+        order_page = OrderPage(driver)
+        order_page.set_name(name)
+        order_page.set_first_name(first_name)
+        order_page.set_address(address)
+        order_page.select_metro_station()
+        order_page.set_phone_number(phone_number)
+        order_page.go_to_next_page()
+        add_order_page = AddOrderPage(driver)
+        add_order_page.wait_for_load_next_page()
+        add_order_page.set_customer_add_data()
+        add_order_page.select_order_button()
+        order_confirm_popup_page = OrderConfirmPopUp(driver)
+        order_confirm_popup_page.confirm_order()
+        assert 'Номер заказа' in order_confirm_popup_page.text_in_modal_pop_up()
 
-    @pytest.mark.parametrize(
-        "user, name, first_name, address", [
-            ("1", "Иван", "Иванов", "Москва, ул. Тверская"),
-            ("2", "Петр", "Петров", "Москва, ул. Пушкинская"),
-        ]
-    )
-    @allure.title('Проверка заказа самоката')
-    def test_order_scooter_top_order_button(self, user, name, first_name, address):
-        self.driver.get(URL)
-        self.order_page.select_order_button_for_user(user)
-        self.order_page.set_name(name)
-        self.order_page.set_first_name(first_name)
-        self.order_page.set_address(address)
-        self.order_page.select_metro_station()
-        self.order_page.set_phone_number()
-        self.order_page.go_to_next_page()
-        self.order_page.set_customer_add_data()
-        self.order_page.confirm_order()
-
-        assert 'Номер заказа' in self.order_page.text_in_modal_pop_up()
-
-    @classmethod
-    def teardown_class(cls):
-        cls.driver.quit()
+    @allure.title('Проверка заказа самоката через нижнюю кнопку "Заказать"')
+    def test_order_scooter_low_order_button(self, driver):
+        main_page = MainPage(driver)
+        main_page.select_low_order_button()
+        order_page = OrderPage(driver)
+        order_page.set_name(name)
+        order_page.set_first_name(first_name)
+        order_page.set_address(address)
+        order_page.select_metro_station()
+        order_page.set_phone_number(phone_number)
+        order_page.go_to_next_page()
+        add_order_page = AddOrderPage(driver)
+        add_order_page.wait_for_load_next_page()
+        add_order_page.set_customer_add_data()
+        add_order_page.select_order_button()
+        order_confirm_popup_page = OrderConfirmPopUp(driver)
+        order_confirm_popup_page.confirm_order()
+        assert 'Номер заказа' in order_confirm_popup_page.text_in_modal_pop_up()

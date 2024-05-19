@@ -1,66 +1,28 @@
-from selenium import webdriver
-from pages.question_page import QuestionPageScooter
-from config import URL
+import pytest
+from pages.main_page import MainPage
+from locators.main_page_locators import MainPageLocators
 import allure
 
 
-class TestQuestionsPage:
-    driver = None
+class TestAnswersToQuestions():
 
-    @classmethod
-    def setup_class(cls):
-        cls.driver = webdriver.Firefox()
-        cls.driver.get(URL)
-        cls.home_page = QuestionPageScooter(cls.driver)
-
-    @allure.title('Проверка ответа на первый вопрос')
-    def test_click_first_question(self, driver):
-        self.home_page.scroll_to_question()
-        self.home_page.select_first_question()
-        assert "Сутки — 400 рублей" in self.home_page.first_answer()
-
-    @allure.title('Проверка ответа на второй вопрос')
-    def test_click_second_question(self, driver):
-        self.home_page.scroll_to_question()
-        self.home_page.select_second_question()
-        assert "Пока что у нас так:" in self.home_page.second_answer()
-
-    @allure.title('Проверка ответа на третий вопрос')
-    def test_click_third_question(self, driver):
-        self.home_page.scroll_to_question()
-        self.home_page.select_third_question()
-        assert "Допустим, вы оформляете" in self.home_page.third_answer()
-
-    @allure.title('Проверка ответа на четвертый вопрос')
-    def test_click_fourth_question(self, driver):
-        self.home_page.scroll_to_question()
-        self.home_page.select_fourth_question()
-        assert "Только начиная" in self.home_page.fourth_answer()
-
-    @allure.title('Проверка ответа на пятый вопрос')
-    def test_click_fifth_question(self, driver):
-        self.home_page.scroll_to_question()
-        self.home_page.select_fifth_question()
-        assert "Пока что нет" in self.home_page.fifth_answer()
-
-    @allure.title('Проверка ответа на шестой вопрос')
-    def test_click_sixth_question(self, driver):
-        self.home_page.scroll_to_question()
-        self.home_page.select_sixth_question()
-        assert "Самокат приезжает к вам" in self.home_page.sixth_answer()
-
-    @allure.title('Проверка ответа на седьмой вопрос')
-    def test_click_seventh_question(self, driver):
-        self.home_page.scroll_to_question()
-        self.home_page.select_seventh_question()
-        assert "Да, пока самокат" in self.home_page.seventh_answer()
-
-    @allure.title('Проверка ответа на восьмой вопрос')
-    def test_click_eighth_question(self, driver):
-        self.home_page.scroll_to_question()
-        self.home_page.select_eighth_question()
-        assert "Да, обязательно" in self.home_page.eighth_answer()
-
-    @classmethod
-    def teardown_class(cls):
-        cls.driver.quit()
+    @allure.title('Проверка ответов на вопросы')
+    @pytest.mark.parametrize(
+        'question_locator, answer_locator, text_answer',
+        [
+            [MainPageLocators.FIRST_QUESTION_SIGN, MainPageLocators.FIRST_QUESTION_TEXT, '400 рублей'],
+            [MainPageLocators.SECOND_QUESTION_SIGN, MainPageLocators.SECOND_QUESTION_TEXT, 'Пока что у нас так:'],
+            [MainPageLocators.THIRD_QUESTION_SIGN, MainPageLocators.THIRD_QUESTION_TEXT, 'Допустим, вы оформляете'],
+            [MainPageLocators.FOURTH_QUESTION_SIGN, MainPageLocators.FOURTH_QUESTION_TEXT, 'Только начиная'],
+            [MainPageLocators.FIFTH_QUESTION_SIGN, MainPageLocators.FIFTH_QUESTION_TEXT, 'Пока что нет'],
+            [MainPageLocators.SIXTH_QUESTION_SIGN, MainPageLocators.SIXTH_QUESTION_TEXT, 'Самокат приезжает'],
+            [MainPageLocators.SEVENTH_QUESTION_SIGN, MainPageLocators.SEVENTH_QUESTION_TEXT, 'Да, пока самокат'],
+            [MainPageLocators.EIGHTH_QUESTION_SIGN, MainPageLocators.EIGHTH_QUESTION_TEXT, 'Да, обязательно']
+        ]
+    )
+    def test_answers_to_question(self, driver, question_locator, answer_locator, text_answer):
+        main_page = MainPage(driver)
+        main_page.move_to_question()
+        main_page.select_question(question_locator)
+        main_page.get_answer(answer_locator)
+        assert text_answer in main_page.get_answer(answer_locator)
